@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  # Laravel Service
+  laravel:
+    build:
+      context: laravel
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_DATABASE=laravel
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - VIRTUAL_HOST=devops.test
+    volumes:
+      - ./laravel:/var/www
+      - /var/www/vendor
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+  # MySQL Service
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel
+
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_web
+    environment:
+      - VIRTUAL_HOST=devops.test
+      - NGINX_CONF_FILE
+    volumes:
+      - .:/var/www
+      - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - laravel
+    networks:
+      - laravel
+
+  # Reverse Proxy
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - laravel
+
+  # Random HTTP Service
+  random_http_service:
+    build:
+      context: random_http_service
+      dockerfile: Dockerfile
+    container_name: random_http_service
+    ports:
+      - "3000:3000"
+    networks:
+      - laravel
+    profiles:
+      - random
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  mysql_data:
