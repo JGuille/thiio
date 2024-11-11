@@ -144,10 +144,4 @@ jobs:
         with:
           name: node-pool-configs
           path: node_pool_configs.json
-          
-      - name: Trigger Scale Down
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_PAT }}
-          event-type: scale-up-stage-pools
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      
