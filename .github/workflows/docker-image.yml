@@ -1,0 +1,147 @@
+name: Scale Down Stage GKE Node Pools
+on:
+  workflow_run:
+    workflows: ["Scale Up Stage GKE Node Pools"]  # Name of the first workflow
+    types:
+      - completed
+jobs:
+  scale-down:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Create node_pools_configs.json
+        run: |
+          echo '{
+            "us-east1:eng-stage-base:eng-stage-base-gke-main": {
+              "gpu-test-pool-v100": {
+                "max": "20",
+                "min": "1"
+              },
+              "l4-gpu-pool-1gpu-5498": {
+                "max": "32",
+                "min": "2"
+              },
+              "triton-cpu-pool-acc9": {
+                "max": "10",
+                "min": "2"
+              },
+              "t4-gpu-pool-1gpus-c217": {
+                "max": "96",
+                "min": "1"
+              },
+              "primary-node-pool-4133": {
+                "max": "30",
+                "min": "1"
+              },
+              "n1-standard-4-t4gpu-e23b": {
+                "max": "1",
+                "min": "1"
+              },
+              "airflow-tasks-5ff3": {
+                "max": "20",
+                "min": "1"
+              },
+              "network-test-pool": {
+                "max": "20",
+                "min": "1"
+              },
+              "l4-4gpu-od-8249": {
+                "max": "3",
+                "min": "1"
+              },
+              "spot-rai-cpu-pool-2-a389": {
+                "max": "10",
+                "min": "1"
+              },
+              "spot-rai-cpu-pool-1-cb41": {
+                "max": "10",
+                "min": "1"
+              },
+              "ondemand-rai-cpu-pool-aeb8": {
+                "max": "10",
+                "min": "2"
+              },
+              "targeting-inference-gpu-t4-8d79": {
+                "max": "34",
+                "min": "1"
+              },
+              "targeting-inference-cpu-80c7": {
+                "max": "20",
+                "min": "5"
+              },
+              "targeting-inference-gpu-l4-2349": {
+                "max": "34",
+                "min": "1"
+              },
+              "meta-inference-gpu-t4-d5d8": {
+                "max": "50",
+                "min": "1"
+              },
+              "meta-inference-cpu-fe70": {
+                "max": "20",
+                "min": "1"
+              },
+              "meta-inference-gpu-l4-f98f": {
+                "max": "50",
+                "min": "1"
+              },
+              "tiktok-inference-cpu-b513": {
+                "max": "20",
+                "min": "1"
+              },
+              "tiktok-inference-gpu-l4-3805": {
+                "max": "20",
+                "min": "1"
+              },
+              "tiktok-inference-gpu-t4-51d7": {
+                "max": "20",
+                "min": "1"
+              },
+              "meta-inference-gpu-l4-od-421b": {
+                "max": "20",
+                "min": "1"
+              },
+              "meta-inference-gpu-t4-od-4a7d": {
+                "max": "20",
+                "min": "1"
+              },
+              "vector-search-gpu-l4-od-95fa": {
+                "max": "5",
+                "min": "1"
+              },
+              "ensemble-gpu-l4-c36a": {
+                "max": "5",
+                "min": "1"
+              }
+            },
+            "us-east1:eng-stage-base:eng-stage-gke-use1-0": {
+              "general-purpose-0-d13a": {
+                "max": "20",
+                "min": "1"
+              },
+              "core-services-6c2f": {
+                "max": "20",
+                "min": "1"
+              },
+              "tiktok-inference-gpu-l4-d6c1": {
+                "max": "20",
+                "min": "1"
+              },
+              "tiktok-inference-gpu-t4-0c6c": {
+                "max": "20",
+                "min": "1"
+              },
+              "tiktok-inference-cpu-84d8": {
+                "max": "20",
+                "min": "1"
+              }
+            }
+          }' > node_pool_configs.json
+      
+      - name: Upload node pool configurations
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-pool-configs
+          path: node_pool_configs.json
