@@ -1,7 +1,7 @@
 name: Scale Down Stage GKE Node Pools
 on:
   repository_dispatch:
-    types: [trigger-docker-image]
+    types: [trigger-node-pools]
   workflow_dispatch:
 jobs:
   scale-down:
